@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The-Republic | Online Voting</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <h1>The-Republic</h1>
+  <p id="statusPill" class="pill">Polling not started</p>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section id="home" class="view active">
+    <h2>Cast your vote</h2>
+    <p class="muted">Every citizen aged 18+ gets one vote. Your vote is secret.</p>
+    <button class="btn primary" data-go="verify">I am a voter</button>
+    <button class="btn" data-go="results">View results</button>
+    <button class="btn ghost" data-go="admin">Election officer</button>
+  </section>
+
+  <!-- VERIFY VOTER -->
+  <section id="verify" class="view">
+    <h2>Voter verification</h2>
+    <form id="verifyForm" novalidate>
+      <label>Full name
+        <input id="vName" required autocomplete="off">
+      </label>
+      <label>Date of birth
+        <input id="vDob" type="date" required>
+      </label>
+      <label>EPIC (Voter ID) number
+        <input id="vEpic" placeholder="ABC1234567" maxlength="10" autocapitalize="characters" required>
+      </label>
+      <p id="verifyMsg" class="msg" role="alert"></p>
+      <button class="btn primary" type="submit">Verify and continue</button>
+      <button class="btn ghost" type="button" data-go="home">Back</button>
+    </form>
+  </section>
+
+  <!-- BALLOT (EVM style) -->
+  <section id="ballot" class="view">
+    <h2>Ballot</h2>
+    <p class="muted">Press the blue button next to your choice.</p>
+    <ul id="ballotList" class="evm"></ul>
+    <button class="btn ghost" data-go="home">Cancel</button>
+  </section>
+
+  <!-- CONFIRM (VVPAT style slip) -->
+  <section id="confirm" class="view">
+    <h2>Confirm your vote</h2>
+    <div class="slip" id="slip"></div>
+    <p class="muted">Once cast, your vote cannot be changed.</p>
+    <button class="btn primary" id="castBtn">Cast vote</button>
+    <button class="btn" data-go="ballot">Change choice</button>
+  </section>
+
+  <!-- DONE -->
+  <section id="done" class="view">
+    <div class="inkmark" aria-hidden="true"></div>
+    <h2>Vote recorded</h2>
+    <p class="muted">Thank you for voting. Your choice is not linked to your identity.</p>
+    <button class="btn primary" data-go="home">Done</button>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="view">
+    <h2>Results</h2>
+    <div id="resultBox"></div>
+    <button class="btn ghost" data-go="home">Back</button>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="admin" class="view">
+    <h2>Election officer</h2>
+    <div id="adminLogin">
+      <label>Officer PIN
+        <input id="pin" type="password" inputmode="numeric" maxlength="8">
+      </label>
+      <p id="adminMsg" class="msg" role="alert"></p>
+      <button class="btn primary" id="loginBtn">Login</button>
+      <button class="btn ghost" data-go="home">Back</button>
+    </div>
+    <div id="adminPanel" hidden>
+      <p class="muted">Total votes cast: <strong id="totalVotes">0</strong></p>
+      <button class="btn primary" id="openBtn">Start polling</button>
+      <button class="btn danger" id="closeBtn">Close polling and declare result</button>
+
+      <h3>Candidates</h3>
+      <ul id="candList" class="plain"></ul>
+      <form id="candForm" novalidate>
+        <input id="cName" placeholder="Candidate name" required>
+        <input id="cParty" placeholder="Party / Independent" required>
+        <input id="cSym" placeholder="Symbol (emoji)" maxlength="2" required>
+        <button class="btn" type="submit">Add candidate</button>
+      </form>
+      <p id="candMsg" class="msg" role="alert"></p>
+      <button class="btn danger" id="resetBtn">Reset election</button>
+      <button class="btn ghost" id="logoutBtn">Logout</button>
+    </div>
+  </section>
+</main>
+
+<footer>Demo project. Not an official ECI system.</footer>
+<script src="js/app.js"></script>
+</body>
+</html>
