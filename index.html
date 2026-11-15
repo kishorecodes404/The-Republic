@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The-Republic | Online Voting</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <h1>The-Republic</h1>
+  <select id="lang" aria-label="Language">
+    <option value="en">English</option>
+    <option value="kn">ಕನ್ನಡ</option>
+    <option value="hi">हिन्दी</option>
+  </select>
+</header>
+<div class="strip">
+  <span id="statusPill" class="pill">Polling not started</span>
+  <span id="timer" class="timer" hidden></span>
+</div>
+
+<main>
+  <!-- HOME -->
+  <section id="home" class="view active">
+    <h2 data-i18n="home.title"></h2>
+    <p class="muted" data-i18n="home.sub"></p>
+    <button class="btn primary" data-go="verify" data-i18n="home.voter"></button>
+    <button class="btn" data-go="results" data-i18n="home.results"></button>
+    <button class="btn" data-go="receipt" data-i18n="home.check"></button>
+    <button class="btn ghost" data-go="admin" data-i18n="home.admin"></button>
+  </section>
+
+  <!-- VERIFY VOTER -->
+  <section id="verify" class="view">
+    <h2 data-i18n="verify.title"></h2>
+    <form id="verifyForm" novalidate>
+      <label><span data-i18n="verify.name"></span>
+        <input id="vName" required autocomplete="off">
+      </label>
+      <label><span data-i18n="verify.dob"></span>
+        <input id="vDob" type="date" required>
+      </label>
+      <label><span data-i18n="verify.epic"></span>
+        <input id="vEpic" placeholder="ABC1234567" maxlength="10" autocapitalize="characters" required>
+      </label>
+      <p id="verifyMsg" class="msg" role="alert"></p>
+      <button class="btn primary" type="submit" data-i18n="verify.submit"></button>
+      <button class="btn ghost" type="button" data-go="home" data-i18n="back"></button>
+    </form>
+  </section>
+
+  <!-- BALLOT (EVM style) -->
+  <section id="ballot" class="view">
+    <h2 data-i18n="ballot.title"></h2>
+    <p class="muted" data-i18n="ballot.sub"></p>
+    <ul id="ballotList" class="evm"></ul>
+    <button class="btn ghost" data-go="home" data-i18n="cancel"></button>
+  </section>
+
+  <!-- CONFIRM (VVPAT style slip) -->
+  <section id="confirm" class="view">
+    <h2 data-i18n="confirm.title"></h2>
+    <div class="slip" id="slip"></div>
+    <p class="muted" data-i18n="confirm.note"></p>
+    <button class="btn primary" id="castBtn" data-i18n="confirm.cast"></button>
+    <button class="btn" data-go="ballot" data-i18n="confirm.change"></button>
+  </section>
+
+  <!-- DONE -->
+  <section id="done" class="view">
+    <div class="inkmark" aria-hidden="true"></div>
+    <h2 data-i18n="done.title"></h2>
+    <p class="muted" data-i18n="done.note"></p>
+    <p class="reflabel" data-i18n="done.ref"></p>
+    <p id="refNo" class="ref"></p>
+    <p class="muted small" data-i18n="done.refnote"></p>
+    <button class="btn" id="copyBtn" data-i18n="done.copy"></button>
+    <button class="btn primary" data-go="home" data-i18n="done.finish"></button>
+  </section>
+
+  <!-- CHECK RECEIPT -->
+  <section id="receipt" class="view">
+    <h2 data-i18n="receipt.title"></h2>
+    <label><span data-i18n="receipt.label"></span>
+      <input id="refInput" placeholder="REP-XXXX-XXXX-XXXX" maxlength="18" autocapitalize="characters" autocomplete="off">
+    </label>
+    <p id="refMsg" class="msg" role="alert"></p>
+    <button class="btn primary" id="refCheck" data-i18n="receipt.check"></button>
+    <button class="btn ghost" data-go="home" data-i18n="back"></button>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="view">
+    <h2 data-i18n="results.title"></h2>
+    <div id="resultBox"></div>
+    <button class="btn ghost" data-go="home" data-i18n="back"></button>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="admin" class="view">
+    <h2 data-i18n="admin.title"></h2>
+    <div id="adminLogin">
+      <label><span data-i18n="admin.pin"></span>
+        <input id="pin" type="password" inputmode="numeric" maxlength="8">
+      </label>
+      <p id="adminMsg" class="msg" role="alert"></p>
+      <button class="btn primary" id="loginBtn" data-i18n="admin.login"></button>
+      <button class="btn ghost" data-go="home" data-i18n="back"></button>
+    </div>
+    <div id="adminPanel" hidden>
+      <p class="muted"><span data-i18n="admin.total"></span>: <strong id="totalVotes">0</strong></p>
+      <label id="durationBox"><span data-i18n="admin.duration"></span>
+        <input id="duration" type="number" min="1" max="1440" value="30" inputmode="numeric">
+      </label>
+      <button class="btn primary" id="openBtn" data-i18n="admin.start"></button>
+      <button class="btn danger" id="closeBtn" data-i18n="admin.close"></button>
+
+      <h3 data-i18n="admin.roll"></h3>
+      <p class="muted"><span data-i18n="admin.rollcount"></span>: <strong id="rollCount">0</strong></p>
+      <div id="rollBox">
+        <form id="voterForm" novalidate>
+          <input id="rName" data-ph="admin.vname" autocomplete="off" required>
+          <input id="rDob" type="date" required>
+          <input id="rEpic" data-ph="admin.vepic" maxlength="10" autocapitalize="characters" required>
+          <button class="btn" type="submit" data-i18n="admin.addvoter"></button>
+        </form>
+        <label class="btn filebtn"><span data-i18n="admin.upload"></span>
+          <input id="csvFile" type="file" accept=".csv,text/csv" hidden>
+        </label>
+        <button class="btn danger" id="clearRollBtn" data-i18n="admin.clearroll"></button>
+      </div>
+      <p id="rollMsg" class="msg" role="alert"></p>
+
+      <h3 data-i18n="admin.cands"></h3>
+      <ul id="candList" class="plain"></ul>
+      <form id="candForm" novalidate>
+        <input id="cName" data-ph="admin.cname" required>
+        <input id="cParty" data-ph="admin.cparty" required>
+        <input id="cSym" data-ph="admin.csym" maxlength="2" required>
+        <button class="btn" type="submit" data-i18n="admin.add"></button>
+      </form>
+      <p id="candMsg" class="msg" role="alert"></p>
+      <button class="btn danger" id="resetBtn" data-i18n="admin.reset"></button>
+      <button class="btn ghost" id="logoutBtn" data-i18n="admin.logout"></button>
+    </div>
+  </section>
+</main>
+
+<footer data-i18n="footer"></footer>
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

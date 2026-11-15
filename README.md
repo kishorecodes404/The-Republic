@@ -31,6 +31,7 @@ KJP (Kishore Janatha Party), KCP(M) (Kishore Communist Party (Marxist)), KNC (Ki
 | GET | /api/admin/summary | officer |
 | POST | /api/admin/start, /close, /reset | officer |
 | POST, DELETE | /api/admin/candidates | officer |
+| POST, DELETE | /api/admin/voters, /api/admin/voters/bulk | officer |
 
 ## Flow
 1. Officer: add candidates, then **Start polling**.
@@ -38,6 +39,7 @@ KJP (Kishore Janatha Party), KCP(M) (Kishore Communist Party (Marxist)), KNC (Ki
 3. Officer: **Close polling**. Results are now visible.
 
 ## Features
+- Electoral roll: voters must match the roll exactly (EPIC + name + date of birth). Fake details are rejected. Officer adds voters one by one or uploads a CSV (see `sample-voters.csv`). The roll locks once polling starts and polling cannot start with an empty roll.
 - Languages: English, Kannada, Hindi (toggle at top, remembered in browser)
 - Vote reference number (e.g. `REP-4F9A-2C1B-77D0`) shown after voting. Random, not linked to voter or choice. Check it from the home screen.
 - Polling countdown: officer sets minutes when starting polling; server auto-closes at zero (leave blank to close manually).

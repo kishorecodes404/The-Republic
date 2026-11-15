@@ -21,7 +21,8 @@ const defaults = () => ({
   ],
   tally: {},                             // candidateId -> count (anonymous)
   voted: [],                             // hashed EPIC numbers (who voted, never what)
-  receipts: []                           // random reference numbers (not linked to voter or choice)
+  receipts: [],                          // random reference numbers (not linked to voter or choice)
+  roll: []                               // electoral roll: { epicHash, name (normalised), dob }
 });
 
 function load() {
@@ -46,6 +47,26 @@ const fail = (res, status, code, error) => res.status(status).json({ error, code
 function newReference() {
   const h = crypto.randomBytes(6).toString('hex').toUpperCase();   // 12 hex chars
   return `REP-${h.slice(0, 4)}-${h.slice(4, 8)}-${h.slice(8, 12)}`;
+}
+
+// electoral roll helpers
+const normName = s => String(s || '').toLowerCase().replace(/[^\p{L}\p{M}\p{N}\s]/gu, '').replace(/\s+/g, ' ').trim();
+function normDob(s) {                                   // accepts YYYY-MM-DD or DD-MM-YYYY / DD/MM/YYYY
+  s = String(s || '').trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/), y, mo, d;
+  if (m) [, y, mo, d] = m;
+  else if ((m = s.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/))) [, d, mo, y] = m;
+  else return null;
+  const iso = `${y}-${mo}-${d}`, dt = new Date(iso);
+  if (isNaN(dt) || dt.toISOString().slice(0, 10) !== iso || dt > new Date()) return null;
+  return iso;
+}
+function makeRollEntry(name, dob, epic) {               // returns { entry } or { code, error }
+  const n = normName(name), e = String(epic || '').trim().toUpperCase(), d = normDob(dob);
+  if (n.length < 3)                return { code: 'name', error: 'Enter your full name.' };
+  if (!d)                          return { code: 'dob',  error: 'Enter a valid date of birth.' };
+  if (!/^[A-Z]{3}[0-9]{7}$/.test(e)) return { code: 'epic', error: 'EPIC must be 3 letters followed by 7 digits.' };
+  return { entry: { epicHash: hashEpic(e), name: n, dob: d } };
 }
 
 // auto-close polling when the timer runs out
@@ -85,7 +106,7 @@ function requireAdmin(req, res, next) {
 
 /* ---------- app ---------- */
 const app = express();
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* ----- public ----- */
@@ -96,19 +117,18 @@ app.get('/api/status', (req, res) => {
 
 app.post('/api/verify', limit('verify'), (req, res) => {
   tick();
-  const name = String(req.body.name || '').trim();
-  const dob = String(req.body.dob || '');
-  const epic = String(req.body.epic || '').trim().toUpperCase();
-
   if (db.status === 'not_started') return fail(res, 400, 'not_started', 'Polling has not started yet.');
   if (db.status === 'closed')      return fail(res, 400, 'closed', 'Polling is closed.');
-  if (name.length < 3)             return fail(res, 400, 'name', 'Enter your full name.');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dob) || isNaN(new Date(dob)) || new Date(dob) > new Date())
-    return fail(res, 400, 'dob', 'Enter a valid date of birth.');
-  if (ageOn(dob) < 18)             return fail(res, 400, 'age', 'You must be 18 or older to vote.');
-  if (!/^[A-Z]{3}[0-9]{7}$/.test(epic)) return fail(res, 400, 'epic', 'EPIC must be 3 letters followed by 7 digits.');
 
-  const epicHash = hashEpic(epic);
+  const made = makeRollEntry(req.body.name, req.body.dob, req.body.epic);
+  if (!made.entry) return fail(res, 400, made.code, made.error);
+  const { epicHash, name, dob } = made.entry;
+
+  // must match the electoral roll exactly (EPIC + name + date of birth)
+  const onRoll = db.roll.find(v => v.epicHash === epicHash);
+  if (!onRoll || onRoll.name !== name || onRoll.dob !== dob)
+    return fail(res, 400, 'mismatch', 'Your details do not match the electoral roll.');
+  if (ageOn(onRoll.dob) < 18)      return fail(res, 400, 'age', 'You must be 18 or older to vote.');
   if (db.voted.includes(epicHash)) return fail(res, 409, 'voted', 'This EPIC number has already voted.');
 
   const token = newToken();
@@ -162,12 +182,13 @@ app.post('/api/admin/login', limit('login'), (req, res) => {
 });
 
 app.get('/api/admin/summary', requireAdmin, (req, res) => {
-  res.json({ status: db.status, candidates: db.candidates, totalVotes: db.voted.length });
+  res.json({ status: db.status, candidates: db.candidates, totalVotes: db.voted.length, rollCount: db.roll.length });
 });
 
 app.post('/api/admin/start', requireAdmin, (req, res) => {
   if (db.status !== 'not_started') return fail(res, 400, 'already_started', 'Polling already started.');
   if (db.candidates.length < 2)    return fail(res, 400, 'min2', 'Add at least 2 candidates.');
+  if (db.roll.length < 1)          return fail(res, 400, 'roll_empty', 'Add voters to the electoral roll first.');
   let closesAt = null;
   const m = req.body.minutes;
   if (m !== null && m !== undefined && m !== '') {
@@ -199,6 +220,36 @@ app.delete('/api/admin/candidates/:id', requireAdmin, (req, res) => {
   if (db.status !== 'not_started') return fail(res, 400, 'locked', 'Candidate list is locked.');
   db.candidates = db.candidates.filter(c => c.id !== req.params.id);
   save(); res.json({ ok: true });
+});
+
+app.post('/api/admin/voters', requireAdmin, (req, res) => {
+  if (db.status !== 'not_started') return fail(res, 400, 'roll_locked', 'Electoral roll is locked.');
+  const made = makeRollEntry(req.body.name, req.body.dob, req.body.epic);
+  if (!made.entry) return fail(res, 400, made.code, made.error);
+  if (db.roll.some(v => v.epicHash === made.entry.epicHash)) return fail(res, 400, 'dup_epic', 'This EPIC is already on the roll.');
+  db.roll.push(made.entry); save();
+  res.json({ ok: true, rollCount: db.roll.length });
+});
+
+app.post('/api/admin/voters/bulk', requireAdmin, (req, res) => {
+  if (db.status !== 'not_started') return fail(res, 400, 'roll_locked', 'Electoral roll is locked.');
+  const lines = String(req.body.csv || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean).slice(0, 5000);
+  if (!lines.length) return fail(res, 400, 'csv', 'Choose a valid CSV file.');
+  if (/^"?name"?\s*,/i.test(lines[0])) lines.shift();                  // skip header row
+  let added = 0, skipped = 0;
+  for (const line of lines) {
+    const c = line.split(',').map(x => x.trim().replace(/^"|"$/g, ''));
+    const made = c.length >= 3 ? makeRollEntry(c[0], c[1], c[2]) : {};
+    if (!made.entry || db.roll.some(v => v.epicHash === made.entry.epicHash)) { skipped++; continue; }
+    db.roll.push(made.entry); added++;
+  }
+  save();
+  res.json({ ok: true, added, skipped, rollCount: db.roll.length });
+});
+
+app.delete('/api/admin/voters', requireAdmin, (req, res) => {
+  if (db.status !== 'not_started') return fail(res, 400, 'roll_locked', 'Electoral roll is locked.');
+  db.roll = []; save(); res.json({ ok: true });
 });
 
 app.post('/api/admin/reset', requireAdmin, (req, res) => {
