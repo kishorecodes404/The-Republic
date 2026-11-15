@@ -24,6 +24,7 @@ KJP (Kishore Janatha Party), KCP(M) (Kishore Communist Party (Marxist)), KNC (Ki
 |---|---|---|
 | GET | /api/status | public |
 | POST | /api/verify | voter |
+| GET | /api/receipt/:ref | public |
 | POST | /api/vote | voter (one-time token) |
 | GET | /api/results | public, after close only |
 | POST | /api/admin/login | officer |
@@ -35,6 +36,11 @@ KJP (Kishore Janatha Party), KCP(M) (Kishore Communist Party (Marxist)), KNC (Ki
 1. Officer: add candidates, then **Start polling**.
 2. Voter: verify, press the blue button on the ballot, confirm slip, cast vote.
 3. Officer: **Close polling**. Results are now visible.
+
+## Features
+- Languages: English, Kannada, Hindi (toggle at top, remembered in browser)
+- Vote reference number (e.g. `REP-4F9A-2C1B-77D0`) shown after voting. Random, not linked to voter or choice. Check it from the home screen.
+- Polling countdown: officer sets minutes when starting polling; server auto-closes at zero (leave blank to close manually).
 
 ## ECI-based rules implemented
 | Rule | Implementation |
