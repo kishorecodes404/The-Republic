@@ -1,0 +1,33 @@
+{
+  "status": "closed",
+  "closesAt": 1794756507789,
+  "candidates": [
+    {
+      "id": "kjp",
+      "name": "Kishore Janatha Party",
+      "party": "KJP",
+      "symbol": "🌸"
+    },
+    {
+      "id": "kcp",
+      "name": "Kishore Communist Party (Marxist)",
+      "party": "KCP(M)",
+      "symbol": "⚒️"
+    },
+    {
+      "id": "knc",
+      "name": "Kishore National Congress",
+      "party": "KNC",
+      "symbol": "✋"
+    }
+  ],
+  "tally": {
+    "nota": 1
+  },
+  "voted": [
+    "738040ded3077cd54bf4191d03e37252245e23cf4fd3a0f1ddb34dad53f33597"
+  ],
+  "receipts": [
+    "REP-1C1F-C73C-B791"
+  ]
+}
