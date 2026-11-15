@@ -1,6 +1,13 @@
 /* Translations: English (en), Kannada (kn), Hindi (hi) */
 const I18N = {
   en: {
+    'admin.roll': 'Electoral roll', 'admin.rollcount': 'Registered voters', 'admin.vname': 'Voter full name',
+    'admin.vepic': 'EPIC number', 'admin.addvoter': 'Add voter', 'admin.upload': 'Upload CSV (name,dob,epic)',
+    'admin.clearroll': 'Clear roll', 'confirm_clearroll': 'Remove all voters from the roll?',
+    'roll.result': 'Added {a}, skipped {s}',
+    'e.mismatch': 'Your details do not match the electoral roll.', 'e.roll_locked': 'Electoral roll is locked.',
+    'e.dup_epic': 'This EPIC is already on the roll.', 'e.roll_empty': 'Add voters to the electoral roll first.',
+    'e.csv': 'Choose a valid CSV file.',
     'status.not_started': 'Polling not started', 'status.open': 'Polling open', 'status.closed': 'Polling closed',
     'timer.label': 'Closes in',
     'home.title': 'Cast your vote',
@@ -39,6 +46,13 @@ const I18N = {
     'e.generic': 'Something went wrong.'
   },
   kn: {
+    'admin.roll': 'ಮತದಾರರ ಪಟ್ಟಿ', 'admin.rollcount': 'ನೋಂದಾಯಿತ ಮತದಾರರು', 'admin.vname': 'ಮತದಾರರ ಪೂರ್ಣ ಹೆಸರು',
+    'admin.vepic': 'ಎಪಿಕ್ ಸಂಖ್ಯೆ', 'admin.addvoter': 'ಮತದಾರರನ್ನು ಸೇರಿಸಿ', 'admin.upload': 'CSV ಅಪ್‌ಲೋಡ್ ಮಾಡಿ (name,dob,epic)',
+    'admin.clearroll': 'ಪಟ್ಟಿ ಅಳಿಸಿ', 'confirm_clearroll': 'ಪಟ್ಟಿಯಿಂದ ಎಲ್ಲಾ ಮತದಾರರನ್ನು ತೆಗೆಯಬೇಕೇ?',
+    'roll.result': 'ಸೇರಿಸಲಾಗಿದೆ {a}, ಬಿಟ್ಟಿದೆ {s}',
+    'e.mismatch': 'ನಿಮ್ಮ ವಿವರಗಳು ಮತದಾರರ ಪಟ್ಟಿಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ.', 'e.roll_locked': 'ಮತದಾರರ ಪಟ್ಟಿ ಲಾಕ್ ಆಗಿದೆ.',
+    'e.dup_epic': 'ಈ ಎಪಿಕ್ ಈಗಾಗಲೇ ಪಟ್ಟಿಯಲ್ಲಿದೆ.', 'e.roll_empty': 'ಮೊದಲು ಮತದಾರರ ಪಟ್ಟಿಗೆ ಮತದಾರರನ್ನು ಸೇರಿಸಿ.',
+    'e.csv': 'ಮಾನ್ಯ CSV ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ.',
     'status.not_started': 'ಮತದಾನ ಇನ್ನೂ ಪ್ರಾರಂಭವಾಗಿಲ್ಲ', 'status.open': 'ಮತದಾನ ತೆರೆದಿದೆ', 'status.closed': 'ಮತದಾನ ಮುಕ್ತಾಯವಾಗಿದೆ',
     'timer.label': 'ಮುಕ್ತಾಯಕ್ಕೆ ಬಾಕಿ',
     'home.title': 'ನಿಮ್ಮ ಮತ ಚಲಾಯಿಸಿ',
@@ -77,6 +91,13 @@ const I18N = {
     'e.generic': 'ಏನೋ ತಪ್ಪಾಗಿದೆ.'
   },
   hi: {
+    'admin.roll': 'मतदाता सूची', 'admin.rollcount': 'पंजीकृत मतदाता', 'admin.vname': 'मतदाता का पूरा नाम',
+    'admin.vepic': 'ईपिक संख्या', 'admin.addvoter': 'मतदाता जोड़ें', 'admin.upload': 'CSV अपलोड करें (name,dob,epic)',
+    'admin.clearroll': 'सूची साफ़ करें', 'confirm_clearroll': 'सूची से सभी मतदाता हटाएं?',
+    'roll.result': 'जोड़े गए {a}, छोड़े गए {s}',
+    'e.mismatch': 'आपके विवरण मतदाता सूची से मेल नहीं खाते।', 'e.roll_locked': 'मतदाता सूची लॉक है।',
+    'e.dup_epic': 'यह ईपिक पहले से सूची में है।', 'e.roll_empty': 'पहले मतदाता सूची में मतदाता जोड़ें।',
+    'e.csv': 'सही CSV फ़ाइल चुनें।',
     'status.not_started': 'मतदान शुरू नहीं हुआ', 'status.open': 'मतदान जारी है', 'status.closed': 'मतदान समाप्त',
     'timer.label': 'बंद होने में',
     'home.title': 'अपना वोट डालें',
