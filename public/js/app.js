@@ -25,7 +25,7 @@ function applyLang() {
   $('lang').value = lang;
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
   document.querySelectorAll('[data-ph]').forEach(el => el.placeholder = t(el.dataset.ph));
-  ['verifyMsg', 'adminMsg', 'candMsg', 'refMsg'].forEach(id => $(id).textContent = '');
+  ['verifyMsg', 'adminMsg', 'candMsg', 'refMsg', 'rollMsg'].forEach(id => $(id).textContent = '');
   renderStatus(); renderTimer();
   if (currentView === 'ballot') renderBallot();
   if (currentView === 'confirm') renderSlip();
@@ -180,7 +180,9 @@ async function renderResults() {
       const w = r.rows.find(x => x.id === r.winner);
       banner = r.tie
         ? `<div class="banner">${esc(t('results.tie'))}</div>`
-        : `<div class="banner">${esc(t('results.winner'))}: ${esc(nameOf(w))} (${esc(partyOf(w))})</div>`;
+        : w
+          ? `<div class="banner">${esc(t('results.winner'))}: ${esc(nameOf(w))} (${esc(partyOf(w))})</div>`
+          : `<div class="banner">${esc(t('results.nowinner'))}</div>`;
     }
     box.innerHTML = banner + `<p class="muted">${esc(t('results.total'))}: ${r.total}</p>` + r.rows.map(x => {
       const pct = r.total ? (x.votes / r.total * 100).toFixed(1) : '0.0';
@@ -212,8 +214,10 @@ async function refreshAdmin() {
     const s = await api('/admin/summary', 'GET', null, true);
     $('adminLogin').hidden = true; $('adminPanel').hidden = false;
     $('totalVotes').textContent = s.totalVotes;
+    $('rollCount').textContent = s.rollCount;
     const notStarted = s.status === 'not_started';
-    $('openBtn').disabled = !notStarted || s.candidates.length < 2;
+    $('openBtn').disabled = !notStarted || s.candidates.length < 2 || s.rollCount < 1;
+    $('rollBox').hidden = !notStarted;
     $('durationBox').hidden = !notStarted;
     $('closeBtn').disabled = s.status !== 'open';
     $('candList').innerHTML = s.candidates.map(c =>
@@ -226,9 +230,9 @@ async function refreshAdmin() {
     $('adminMsg').textContent = errText(err);
   }
 }
-async function adminAction(fn) {
-  try { await fn(); $('candMsg').textContent = ''; }
-  catch (err) { $('candMsg').textContent = errText(err); }
+async function adminAction(fn, msgId = 'candMsg') {
+  try { await fn(); $(msgId).textContent = ''; }
+  catch (err) { $(msgId).textContent = errText(err); $(msgId).className = 'msg'; }
   await refreshAdmin();
 }
 $('candList').addEventListener('click', e => {
@@ -242,6 +246,30 @@ $('candForm').addEventListener('submit', e => {
     await api('/admin/candidates', 'POST', { name: $('cName').value, party: $('cParty').value, symbol: $('cSym').value }, true);
     form.reset();
   });
+});
+/* electoral roll */
+$('voterForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const form = e.target;
+  adminAction(async () => {
+    await api('/admin/voters', 'POST', { name: $('rName').value, dob: $('rDob').value, epic: $('rEpic').value }, true);
+    form.reset();
+  }, 'rollMsg');
+});
+$('csvFile').addEventListener('change', async e => {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  const msg = $('rollMsg');
+  try {
+    const csv = await file.text();
+    const r = await api('/admin/voters/bulk', 'POST', { csv }, true);
+    msg.textContent = t('roll.result').replace('{a}', r.added).replace('{s}', r.skipped);
+    msg.className = 'msg ok';
+  } catch (err) { msg.textContent = errText(err); msg.className = 'msg'; }
+  refreshAdmin();
+});
+$('clearRollBtn').addEventListener('click', () => {
+  if (confirm(t('confirm_clearroll'))) adminAction(() => api('/admin/voters', 'DELETE', null, true), 'rollMsg');
 });
 $('openBtn').addEventListener('click', () =>
   adminAction(() => api('/admin/start', 'POST', { minutes: $('duration').value }, true)));

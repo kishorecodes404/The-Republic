@@ -116,6 +116,22 @@
       <button class="btn primary" id="openBtn" data-i18n="admin.start"></button>
       <button class="btn danger" id="closeBtn" data-i18n="admin.close"></button>
 
+      <h3 data-i18n="admin.roll"></h3>
+      <p class="muted"><span data-i18n="admin.rollcount"></span>: <strong id="rollCount">0</strong></p>
+      <div id="rollBox">
+        <form id="voterForm" novalidate>
+          <input id="rName" data-ph="admin.vname" autocomplete="off" required>
+          <input id="rDob" type="date" required>
+          <input id="rEpic" data-ph="admin.vepic" maxlength="10" autocapitalize="characters" required>
+          <button class="btn" type="submit" data-i18n="admin.addvoter"></button>
+        </form>
+        <label class="btn filebtn"><span data-i18n="admin.upload"></span>
+          <input id="csvFile" type="file" accept=".csv,text/csv" hidden>
+        </label>
+        <button class="btn danger" id="clearRollBtn" data-i18n="admin.clearroll"></button>
+      </div>
+      <p id="rollMsg" class="msg" role="alert"></p>
+
       <h3 data-i18n="admin.cands"></h3>
       <ul id="candList" class="plain"></ul>
       <form id="candForm" novalidate>

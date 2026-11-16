@@ -1,6 +1,6 @@
 {
-  "status": "not_started",
-  "closesAt": null,
+  "status": "open",
+  "closesAt": 1794765539335,
   "candidates": [
     {
       "id": "kjp",
@@ -21,8 +21,40 @@
       "symbol": "✋"
     }
   ],
-  "tally": {},
-  "voted": [],
-  "receipts": [],
-  "roll": []
+  "tally": {
+    "kcp": 1
+  },
+  "voted": [
+    "a3efbb1b4845d96be8ddbceb5ab55872adbe05f0862587dd94e2add80291fa34"
+  ],
+  "receipts": [
+    "REP-8B64-3C65-0E1E"
+  ],
+  "roll": [
+    {
+      "epicHash": "a3efbb1b4845d96be8ddbceb5ab55872adbe05f0862587dd94e2add80291fa34",
+      "name": "kishore ms",
+      "dob": "2007-03-25"
+    },
+    {
+      "epicHash": "e9555d2bce5fb5aea3716a64ba455be82ccf5bed7257dcd67985c2c2c27b6650",
+      "name": "kishan lj",
+      "dob": "2007-03-25"
+    },
+    {
+      "epicHash": "27a16ed8e5028cda03785e6c0cb1243049c5514b250d2c5212af791441c8a900",
+      "name": "kishan k",
+      "dob": "2007-03-25"
+    },
+    {
+      "epicHash": "bb5d84856fec2fcc1547e7c5e33169fe59e105b36699f02e6d4eddfbb9cb07a1",
+      "name": "karthik reddy",
+      "dob": "2007-03-25"
+    },
+    {
+      "epicHash": "436a8b6e8578f5a10f3ce99568a3699d5192b039cb62b2af1594e60e6a003d91",
+      "name": "keshava m",
+      "dob": "2007-03-25"
+    }
+  ]
 }
