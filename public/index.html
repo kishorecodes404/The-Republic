@@ -69,6 +69,21 @@
     </form>
   </section>
 
+  <!-- OTP VERIFICATION -->
+  <section id="otp" class="view">
+    <h2 data-i18n="otp.title"></h2>
+    <p id="otpHint" class="muted"></p>
+    <form id="otpForm" novalidate>
+      <label><span data-i18n="otp.label"></span>
+        <input id="otpInput" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="••••••">
+      </label>
+      <p id="otpMsg" class="msg" role="alert"></p>
+      <button class="btn primary" id="otpBtn" type="submit" data-i18n="otp.submit"></button>
+      <button class="btn" id="otpResend" type="button" data-i18n="otp.resend"></button>
+      <button class="btn ghost" type="button" data-go="verify" data-i18n="back"></button>
+    </form>
+  </section>
+
   <!-- BALLOT (EVM style) -->
   <section id="ballot" class="view">
     <h2 data-i18n="ballot.title"></h2>
@@ -148,6 +163,7 @@
             <input id="rName" data-ph="admin.vname" autocomplete="off" required>
             <input id="rDob" type="date" required>
             <input id="rEpic" data-ph="admin.vepic" maxlength="10" autocapitalize="characters" autocomplete="off" required>
+            <input id="rEmail" type="email" data-ph="admin.vemail" autocomplete="off" required>
             <button class="btn" type="submit" data-i18n="admin.addvoter"></button>
           </form>
           <label class="btn filebtn"><span data-i18n="admin.upload"></span>
@@ -182,7 +198,6 @@
 </main>
 
 <footer>
-  <span data-i18n="footer"></span>
   <span class="gov">© 2026 Government of Kishore · Department of Elections (Chief Officer: Kishore)</span>
 </footer>
 

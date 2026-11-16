@@ -9,6 +9,7 @@ let clockOffset = 0;            // serverTime - clientTime
 let voteToken = null;
 let choice = null;
 let adminToken = null;
+let otpSid = null, otpEmail = '', resendLeft = 0;
 let currentView = 'home';
 let lang = 'en';
 try { lang = localStorage.getItem('lang') || 'en'; } catch {}
@@ -25,8 +26,9 @@ function applyLang() {
   $('lang').value = lang;
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
   document.querySelectorAll('[data-ph]').forEach(el => el.placeholder = t(el.dataset.ph));
-  ['verifyMsg', 'adminMsg', 'candMsg', 'refMsg', 'rollMsg'].forEach(id => $(id).textContent = '');
-  renderStatus(); renderTimer();
+  ['verifyMsg', 'otpMsg', 'adminMsg', 'candMsg', 'refMsg', 'rollMsg'].forEach(id => $(id).textContent = '');
+  renderStatus(); renderTimer(); renderResend();
+  if (currentView === 'otp') renderOtpHint();
   if (currentView === 'ballot') renderBallot();
   if (currentView === 'confirm') renderSlip();
   if (currentView === 'results') renderResults();
@@ -49,7 +51,7 @@ async function api(path, method = 'GET', body, admin = false) {
     const e = new Error('Cannot reach server.'); e.code = 'network'; throw e;
   }
   const data = await r.json().catch(() => ({}));
-  if (!r.ok) { const e = new Error(data.error || 'Error'); e.code = data.code; throw e; }
+  if (!r.ok) { const e = new Error(data.error || 'Error'); e.code = data.code; e.left = data.left; throw e; }
   return data;
 }
 
@@ -59,6 +61,8 @@ async function show(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   $(id).classList.add('active');
   window.scrollTo(0, 0);
+  if (id === 'home' || id === 'verify') otpSid = null;
+  if (id === 'otp') { renderOtpHint(); $('otpMsg').textContent = ''; $('otpInput').value = ''; setTimeout(() => $('otpInput').focus(), 50); }
   if (id === 'ballot') renderBallot();
   if (id === 'results') { await loadStatus(); await renderResults(); }
   if (id === 'admin') await refreshAdmin();
@@ -108,11 +112,53 @@ $('verifyForm').addEventListener('submit', async e => {
   const msg = $('verifyMsg'); msg.textContent = '';
   try {
     const r = await api('/verify', 'POST', { name: $('vName').value, dob: $('vDob').value, epic: $('vEpic').value });
-    voteToken = r.token; choice = null;
     e.target.reset();
     await loadStatus();
+    if (r.otpRequired) {                       // step 2: OTP sent to the registered email
+      otpSid = r.sid; otpEmail = r.email; resendLeft = r.resendIn || 30; renderResend();
+      return show('otp');
+    }
+    voteToken = r.token; choice = null;
     show('ballot');
   } catch (err) { msg.textContent = errText(err); await loadStatus(); }
+});
+
+/* ---------- OTP step ---------- */
+function renderOtpHint() { $('otpHint').textContent = t('otp.sent').replace('{e}', otpEmail); }
+function renderResend() {
+  const b = $('otpResend');
+  b.disabled = resendLeft > 0;
+  b.textContent = resendLeft > 0 ? t('otp.resend_in').replace('{s}', resendLeft) : t('otp.resend');
+}
+setInterval(() => { if (resendLeft > 0) { resendLeft--; renderResend(); } }, 1000);
+
+$('otpForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = $('otpMsg'); msg.textContent = ''; msg.className = 'msg';
+  if (!otpSid) return show('verify');
+  $('otpBtn').disabled = true;
+  try {
+    const r = await api('/verify/otp', 'POST', { sid: otpSid, otp: $('otpInput').value.trim() });
+    voteToken = r.token; choice = null; otpSid = null;
+    $('otpInput').value = '';
+    await loadStatus();
+    show('ballot');
+  } catch (err) {
+    let m = errText(err);
+    if (err.code === 'otp_invalid' && err.left != null) m += ' ' + t('otp.left').replace('{n}', err.left);
+    msg.textContent = m; $('otpInput').value = '';
+    if (['otp_locked', 'session', 'voted', 'closed', 'not_open'].includes(err.code)) otpSid = null;   // session is dead: go back and verify again
+    await loadStatus();
+  } finally { $('otpBtn').disabled = false; }
+});
+$('otpResend').addEventListener('click', async () => {
+  const msg = $('otpMsg'); msg.textContent = ''; msg.className = 'msg';
+  if (!otpSid) return show('verify');
+  try {
+    const r = await api('/verify/resend', 'POST', { sid: otpSid });
+    resendLeft = r.resendIn || 30; renderResend();
+    msg.textContent = t('otp.resent'); msg.className = 'msg ok';
+  } catch (err) { msg.textContent = errText(err); }
 });
 
 /* ---------- ballot ---------- */
@@ -252,7 +298,7 @@ $('voterForm').addEventListener('submit', e => {
   e.preventDefault();
   const form = e.target;
   adminAction(async () => {
-    await api('/admin/voters', 'POST', { name: $('rName').value, dob: $('rDob').value, epic: $('rEpic').value }, true);
+    await api('/admin/voters', 'POST', { name: $('rName').value, dob: $('rDob').value, epic: $('rEpic').value, email: $('rEmail').value }, true);
     form.reset();
   }, 'rollMsg');
 });
