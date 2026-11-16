@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Online voting demo with Node.js backend",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
-  "dependencies": { "express": "^4.19.2" }
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "nodemailer": "^10.6.0"
+  }
 }
