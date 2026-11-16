@@ -1,6 +1,6 @@
 {
   "status": "open",
-  "closesAt": 1794765539335,
+  "closesAt": 1794858242049,
   "candidates": [
     {
       "id": "kjp",
@@ -21,15 +21,9 @@
       "symbol": "✋"
     }
   ],
-  "tally": {
-    "kcp": 1
-  },
-  "voted": [
-    "a3efbb1b4845d96be8ddbceb5ab55872adbe05f0862587dd94e2add80291fa34"
-  ],
-  "receipts": [
-    "REP-8B64-3C65-0E1E"
-  ],
+  "tally": {},
+  "voted": [],
+  "receipts": [],
   "roll": [
     {
       "epicHash": "a3efbb1b4845d96be8ddbceb5ab55872adbe05f0862587dd94e2add80291fa34",
